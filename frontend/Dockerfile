@@ -10,6 +10,11 @@ COPY package*.json ./
 # Instalar dependências
 RUN npm install 
 RUN npm install vue-router
+RUN npm install lucide-vue-next
+RUN npm install tailwindcss @tailwindcss/vite
+
+
+
 
 # Copiar o restante do código fonte
 COPY . .
