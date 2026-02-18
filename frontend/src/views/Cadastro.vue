@@ -1,23 +1,49 @@
 <template>
-  <div class="cadastro">
-    <h2>Criar Conta</h2>
-    <form @submit.prevent="handleCadastro">
-      <input v-model="nome" type="text" placeholder="Nome" required />
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="senha" type="password" placeholder="Senha" required />
+  <div class="max-w-md mx-auto mt-20 bg-[#131516] border border-[#252829] rounded-xl p-8 shadow-lg">
+    
+    <div class="text-center mb-8">
+      <User class="w-12 h-12 text-[#2FA36A] mx-auto mb-4" />
+      <h2 class="text-2xl font-bold" style="font-family: 'Poppins', sans-serif;">
+        Criar Conta
+      </h2>
+    </div>
 
-      <button class="btn" type="submit">Confirmar Cadastro</button>
+    <form @submit.prevent="handleCadastro" class="flex flex-col gap-4">
+      <input v-model="nome" type="text" placeholder="Nome" required
+        class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+
+      <input v-model="email" type="email" placeholder="Email" required
+        class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+
+      <input v-model="senha" type="password" placeholder="Senha" required
+        class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+
+      <button type="submit"
+        class="bg-[#2FA36A] py-3 rounded-lg font-semibold hover:bg-[#3BB77C] transition">
+        Confirmar Cadastro
+      </button>
+
       <router-link to="/">
-        <button class="btn-secondary" type="button">Cancelar</button>
+        <button type="button"
+          class="w-full bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg hover:bg-[#252829] transition">
+          Cancelar
+        </button>
       </router-link>
     </form>
 
-    <p v-if="erro" class="erro">{{ erro }}</p>
-    <p v-if="sucesso" class="sucesso">Cadastro realizado com sucesso!</p>
+    <p v-if="erro" class="text-[#EF4444] text-sm mt-4 text-center">
+      {{ erro }}
+    </p>
+
+    <p v-if="sucesso" class="text-[#10B981] text-sm mt-4 text-center flex items-center justify-center gap-2">
+      <Check class="w-4 h-4" />
+      Cadastro realizado com sucesso!
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { User, Check } from 'lucide-vue-next'
 import { ref } from 'vue'
 import usuarioService from '../services/usuarioService'
 import { useRouter } from 'vue-router'
@@ -41,60 +67,10 @@ const handleCadastro = async () => {
       senha: senha.value,
     })
     sucesso.value = true
-    setUsuario(usuario) // salva no estado global
+    setUsuario(usuario)
     router.push('/filmes')
   } catch (e: any) {
     erro.value = e.message || 'Erro ao cadastrar'
   }
 }
 </script>
-
-
-<style scoped>
-.cadastro {
-  text-align: center;
-  margin-top: 50px;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  max-width: 300px;
-  margin: auto;
-}
-input {
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-.btn {
-  background-color: #ff5722;
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn:hover {
-  background-color: #e64a19;
-}
-.btn-secondary {
-  background-color: #ccc;
-  color: #333;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn-secondary:hover {
-  background-color: #aaa;
-}
-.erro {
-  color: red;
-  margin-top: 10px;
-}
-.sucesso {
-  color: green;
-  margin-top: 10px;
-}
-</style>

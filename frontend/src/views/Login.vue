@@ -1,21 +1,63 @@
 <template>
-  <div class="login">
-    <h2>Login</h2>
-    <form @submit.prevent="handleLogin">
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="senha" type="password" placeholder="Senha" required />
+  <div class="max-w-md mx-auto mt-20 bg-[#131516] border border-[#252829] rounded-xl p-8 shadow-lg">
+    
+    <div class="text-center mb-8">
+      <User class="w-12 h-12 text-[#2FA36A] mx-auto mb-4" />
+      <h2 class="text-2xl font-bold" style="font-family: 'Poppins', sans-serif;">
+        Login
+      </h2>
+    </div>
 
-      <button class="btn" type="submit">Entrar</button>
+    <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
+      <input
+        v-model="email"
+        type="email"
+        placeholder="Email"
+        required
+        class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
+      />
+
+      <input
+        v-model="senha"
+        type="password"
+        placeholder="Senha"
+        required
+        class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
+      />
+
+      <button
+        type="submit"
+        class="bg-[#2FA36A] py-3 rounded-lg font-semibold hover:bg-[#3BB77C] transition"
+      >
+        Entrar
+      </button>
+
       <router-link to="/">
-        <button class="btn-secondary" type="button">Cancelar</button>
+        <button
+          type="button"
+          class="w-full bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg hover:bg-[#252829] transition"
+        >
+          Cancelar
+        </button>
+      </router-link>
+
+      <!-- NOVA OPÇÃO DE CADASTRO -->
+      <router-link
+        to="/cadastro"
+        class="text-sm text-[#2FA36A] hover:text-[#3BB77C] text-center mt-3 transition"
+      >
+        Não possuo cadastro
       </router-link>
     </form>
 
-    <p v-if="erro" class="erro">{{ erro }}</p>
+    <p v-if="erro" class="text-[#EF4444] text-sm mt-4 text-center">
+      {{ erro }}
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { User } from 'lucide-vue-next'
 import { ref } from 'vue'
 import usuarioService from '../services/usuarioService'
 import { useRouter } from 'vue-router'
@@ -31,56 +73,10 @@ const handleLogin = async () => {
   erro.value = ''
   try {
     const usuario = await usuarioService.login(email.value, senha.value)
-    setUsuario(usuario) // salva no estado global
+    setUsuario(usuario)
     router.push('/filmes')
   } catch (e: any) {
     erro.value = e.message || 'Dados inválidos'
   }
 }
 </script>
-
-
-<style scoped>
-.login {
-  text-align: center;
-  margin-top: 50px;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  max-width: 300px;
-  margin: auto;
-}
-input {
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-.btn {
-  background-color: #ff5722;
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn:hover {
-  background-color: #e64a19;
-}
-.btn-secondary {
-  background-color: #ccc;
-  color: #333;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn-secondary:hover {
-  background-color: #aaa;
-}
-.erro {
-  color: red;
-  margin-top: 10px;
-}
-</style>
