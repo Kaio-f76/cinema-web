@@ -6,9 +6,9 @@
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="senha" type="password" placeholder="Senha" required />
 
-      <button type="submit">Confirmar Cadastro</button>
+      <button class="btn" type="submit">Confirmar Cadastro</button>
       <router-link to="/">
-        <button type="button">Cancelar</button>
+        <button class="btn-secondary" type="button">Cancelar</button>
       </router-link>
     </form>
 
@@ -20,40 +20,81 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import usuarioService from '../services/usuarioService'
+import { useRouter } from 'vue-router'
+import { useUsuario } from '../composables/useUsuario'
 
 const nome = ref('')
 const email = ref('')
 const senha = ref('')
 const erro = ref('')
 const sucesso = ref(false)
+const router = useRouter()
+const { setUsuario } = useUsuario()
 
 const handleCadastro = async () => {
   erro.value = ''
   sucesso.value = false
   try {
-    await usuarioService.criarConta({
+    const usuario = await usuarioService.criarConta({
       nome: nome.value,
       email: email.value,
       senha: senha.value,
     })
     sucesso.value = true
+    setUsuario(usuario) // salva no estado global
+    router.push('/filmes')
   } catch (e: any) {
     erro.value = e.message || 'Erro ao cadastrar'
   }
 }
 </script>
 
+
 <style scoped>
-.erro { color: red; }
-.sucesso { color: green; }
+.cadastro {
+  text-align: center;
+  margin-top: 50px;
+}
 form {
   display: flex;
   flex-direction: column;
   max-width: 300px;
   margin: auto;
 }
-input, button {
+input {
   margin: 10px 0;
   padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.btn {
+  background-color: #ff5722;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #e64a19;
+}
+.btn-secondary {
+  background-color: #ccc;
+  color: #333;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background-color: #aaa;
+}
+.erro {
+  color: red;
+  margin-top: 10px;
+}
+.sucesso {
+  color: green;
+  margin-top: 10px;
 }
 </style>
