@@ -5,6 +5,7 @@ import Login from '../views/Login.vue'
 import Filmes from '../views/Filmes.vue'
 import Salas from '../views/Salas.vue'
 import usuarioService from '../services/usuarioService'
+import { useUsuario } from '../composables/useUsuario'
 
 
 const routes = [
@@ -23,7 +24,9 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAuth) {
         try {
-            await usuarioService.getUsuario() // chama /api/usuarios/me
+            const user = await usuarioService.getUsuario() // chama /api/usuarios/me
+            const { setUsuario } = useUsuario()
+            setUsuario(user) // persiste o usuário no state reativo
             next()
         } catch (err: any) {
             if (err.response?.status === 440) {

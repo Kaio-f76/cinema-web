@@ -98,13 +98,17 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { Film, LogOut, User } from 'lucide-vue-next'
 import { useUsuario } from './composables/useUsuario'
 import usuarioService from './services/usuarioService'
 import { useRouter } from 'vue-router'
 
-const { usuario, clearUsuario } = useUsuario()
+const { usuario, clearUsuario, fetchUsuario } = useUsuario()
 const router = useRouter()
+
+// Recarrega o usuário da sessão ao montar (ex: após F5)
+onMounted(() => fetchUsuario())
 
 const handleLogout = async () => {
   await usuarioService.logout()
