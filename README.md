@@ -30,6 +30,8 @@ Para detalhes adicionais sobre o funcionamento do projeto e sua integração com
 1. Instale as dependências:
    ```bash
    npm install
+   npm install -D @tailwindcss/vite
+   npm install lucide-vue-next
    ```
 2. Execute o servidor de desenvolvimento:
    ```bash
