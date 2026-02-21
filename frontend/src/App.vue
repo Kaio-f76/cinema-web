@@ -43,6 +43,23 @@
           Filmes
         </router-link>
 
+        <!-- SALAS -->
+        <router-link
+          v-if="usuario"
+          to="/salas"
+          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
+        >
+          Salas
+        </router-link>
+
+        <router-link
+          v-else
+          to="/login"
+          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
+        >
+          Salas
+        </router-link>
+
       </div>
 
       <!-- DIREITA - LOGIN / LOGOUT -->
