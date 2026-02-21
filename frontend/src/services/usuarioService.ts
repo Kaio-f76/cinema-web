@@ -9,8 +9,7 @@ const usuarioService = {
 
     async login(email: string, senha: string): Promise<Usuario> {
         const response = await api.post<Usuario>(
-            `/usuarios/login?email=${email}&senha=${senha}`
-        );
+            `/usuarios/login`, { email, senha });
         return response.data;
     },
 
