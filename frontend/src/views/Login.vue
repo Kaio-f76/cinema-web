@@ -76,7 +76,12 @@ const handleLogin = async () => {
     setUsuario(usuario)
     router.push('/filmes')
   } catch (e: any) {
-    erro.value = e.message || 'Dados inválidos'
+    if (e.response?.status === 401) {
+      erro.value = e.response.data // "Email incorreto." ou "Senha incorreta."
+    } else {
+      erro.value = e.message || 'Erro ao tentar login.'
+    }
   }
+
 }
 </script>
