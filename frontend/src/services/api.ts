@@ -14,7 +14,7 @@ api.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 440) {
-            alert("Sessão expirada. Faça login novamente.");
+            //alert("Sessão expirada. Faça login novamente.");
             router.push("/login");
         }
         return Promise.reject(error);

@@ -6,61 +6,52 @@
 
       <!-- ESQUERDA - LOGO -->
       <div class="flex items-center gap-3">
-        <!-- Ícone com fundo verde, contorno arredondado suave e cor branca -->
-        <div class="bg-[#2FA36A] p-1 rounded-lg flex items-center justify-center border border-[#27A35F]">
-          <Film class="w-7 h-7 text-white" />
-        </div>
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="#2FA36A"/>
+          <!-- Rolo de filme -->
+          <circle cx="20" cy="20" r="10" stroke="white" stroke-width="2" fill="none"/>
+          <circle cx="20" cy="20" r="4" fill="white"/>
+          <!-- Perfurações do rolo -->
+          <circle cx="20" cy="11" r="1.5" fill="white"/>
+          <circle cx="20" cy="29" r="1.5" fill="white"/>
+          <circle cx="11" cy="20" r="1.5" fill="white"/>
+          <circle cx="29" cy="20" r="1.5" fill="white"/>
+          <circle cx="13.6" cy="13.6" r="1.5" fill="white"/>
+          <circle cx="26.4" cy="26.4" r="1.5" fill="white"/>
+          <circle cx="26.4" cy="13.6" r="1.5" fill="white"/>
+          <circle cx="13.6" cy="26.4" r="1.5" fill="white"/>
+        </svg>
         <h1 class="text-2xl font-bold" style="font-family: 'Poppins', sans-serif;">
           CinemaMax
         </h1>
       </div>
 
       <!-- CENTRO - NAVEGAÇÃO -->
-      <div class="flex items-center gap-6">
-        
-        <!-- INÍCIO (verde) -->
+      <nav class="flex items-center gap-2">
         <router-link
           to="/"
-          class="bg-[#2FA36A] px-5 py-2 rounded-lg font-semibold hover:bg-[#3BB77C] transition"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
         >
           Início
         </router-link>
 
-        <!-- FILMES (redireciona para login se não estiver logado) -->
         <router-link
-          v-if="usuario"
-          to="/filmes"
-          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
+          :to="usuario ? '/filmes' : '/login'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/filmes' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
         >
           Filmes
         </router-link>
 
         <router-link
-          v-else
-          to="/login"
-          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
-        >
-          Filmes
-        </router-link>
-
-        <!-- SALAS -->
-        <router-link
-          v-if="usuario"
-          to="/salas"
-          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
+          :to="usuario ? '/salas' : '/login'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/salas' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
         >
           Salas
         </router-link>
-
-        <router-link
-          v-else
-          to="/login"
-          class="bg-[#1A1C1E] border border-[#252829] px-5 py-2 rounded-lg hover:bg-[#252829] transition"
-        >
-          Salas
-        </router-link>
-
-      </div>
+      </nav>
 
       <!-- DIREITA - LOGIN / LOGOUT -->
       <div class="flex items-center gap-4">
