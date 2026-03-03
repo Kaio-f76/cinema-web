@@ -51,6 +51,14 @@
         >
           Salas
         </router-link>
+
+        <router-link
+          :to="usuario ? '/sessoes' : '/login'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/sessoes' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
+        >
+          Sessões
+        </router-link>
       </nav>
 
       <!-- DIREITA - LOGIN / LOGOUT -->

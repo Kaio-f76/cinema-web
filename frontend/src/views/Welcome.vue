@@ -15,6 +15,7 @@
 
     <!-- CONTEÚDO DO FILME -->
     <div
+      v-if="filmes.length > 0"
       class="relative z-10 flex items-center justify-between h-full px-16"
       @touchstart="touchStart($event)"
       @touchmove="touchMove($event)"
@@ -64,7 +65,7 @@
 
           <!-- RESUMO -->
           <p class="text-sm max-h-[4.5rem] overflow-hidden">
-            {{ filmeAtual.resumo }}
+            {{ filmeAtual.descricao }}
           </p>
 
           <!-- GÊNEROS -->
@@ -81,21 +82,23 @@
           <!-- BOTÕES -->
           <div class="flex gap-4 mt-4">
             <!-- Comprar Ingresso -->
-            <button
+            <router-link
+              to="/filmes"
               class="flex items-center gap-2 bg-[#2FA36A] border border-white text-white px-4 py-2 rounded-lg hover:bg-[#3BB77C] transition-transform transform active:scale-95"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 4l12 8-12 8z"/>
               </svg>
               Comprar Ingresso
-            </button>
+            </router-link>
 
             <!-- Saiba Mais -->
-            <button
+            <router-link
+              to="/filmes"
               class="bg-gray-600 border border-white text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-transform transform active:scale-95"
             >
               Saiba mais
-            </button>
+            </router-link>
           </div>
 
         </div>
@@ -111,72 +114,69 @@
 
     </div>
 
+    <!-- LOADING -->
+    <div v-if="loading" class="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
+      <div class="inline-block w-10 h-10 border-4 border-[#2FA36A] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <!-- SEM FILMES -->
+    <div v-if="!loading && filmes.length === 0" class="absolute inset-0 z-20 flex items-center justify-center">
+      <p class="text-[#A8AAAD] text-lg">Nenhum filme cadastrado.</p>
+    </div>
+
     <!-- BARRINHAS DE PROGRESSO -->
-    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
+    <div v-if="filmes.length > 0" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
       <div
         v-for="(f, index) in filmes"
         :key="index"
-        class="w-8 h-1 rounded-full border border-white transition-colors duration-500"
+        class="w-8 h-1 rounded-full border border-white transition-colors duration-500 cursor-pointer"
         :class="filmeAtualIndex === index ? 'bg-[#2FA36A]' : 'bg-black'"
+        @click="filmeAtualIndex = index"
       ></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUsuario } from '../composables/useUsuario'
+import { useFilme } from '../composables/useFilme'
+import type { Filme } from '../types/Filme'
 
 const { usuario } = useUsuario()
-
-// Filmes fake
-const filmes = ref([
-  {
-    nome: 'Matrix Resurrections',
-    classificacao: '8.5',
-    duracao: 152,
-    resumo:
-      'Neo retorna para um mundo que mistura realidade e ilusão, enfrentando novos desafios e inimigos poderosos.',
-    generos: ['Ação', 'Ficção Científica'],
-    poster: 'https://picsum.photos/1920/1080?random=1'
-  },
-  {
-    nome: 'Duna',
-    classificacao: '8.2',
-    duracao: 155,
-    resumo:
-      'Paul Atreides luta para proteger o futuro de sua família e seu planeta em um conflito intergaláctico épico.',
-    generos: ['Aventura', 'Ficção Científica', 'Drama'],
-    poster: 'https://picsum.photos/1920/1080?random=2'
-  },
-  {
-    nome: 'O Poderoso Chefão',
-    classificacao: '9.2',
-    duracao: 175,
-    resumo:
-      'A saga da família Corleone enquanto eles navegam no mundo do crime e do poder em Nova York.',
-    generos: ['Crime', 'Drama'],
-    poster: 'https://picsum.photos/1920/1080?random=3'
-  }
-])
+const { filmes, loading, listarFilmes } = useFilme()
 
 const filmeAtualIndex = ref(0)
-const filmeAtual = ref(filmes.value[filmeAtualIndex.value])
 const transicao = ref('slide-left')
+
+const filmeAtual = computed<Filme & { poster: string; generos: string[] }>(() => {
+  const f = filmes.value[filmeAtualIndex.value]
+  if (!f) {
+    return { nome: '', poster: '', generos: [], duracao: 0, classificacao: '', descricao: '' } as any
+  }
+  return {
+    ...f,
+    poster: f.imagemUrl ? `/filmes/${f.imagemUrl}` : 'https://picsum.photos/1920/1080?random=' + filmeAtualIndex.value,
+    generos: f.genero ? [f.genero] : []
+  }
+})
 
 // Navegação
 const proximoFilme = () => {
+  if (filmes.value.length === 0) return
   transicao.value = 'slide-left'
   filmeAtualIndex.value = (filmeAtualIndex.value + 1) % filmes.value.length
-  filmeAtual.value = filmes.value[filmeAtualIndex.value]
 }
 
 const anteriorFilme = () => {
+  if (filmes.value.length === 0) return
   transicao.value = 'slide-right'
   filmeAtualIndex.value = (filmeAtualIndex.value - 1 + filmes.value.length) % filmes.value.length
-  filmeAtual.value = filmes.value[filmeAtualIndex.value]
 }
 
+onMounted(() => {
+  listarFilmes()
+})
 </script>
 
 <style scoped>

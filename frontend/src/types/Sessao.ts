@@ -1,6 +1,6 @@
 export interface Sessao {
     id?: string
-    data?: string
+    data?: string | number
     horarioFilme?: string
     filme?: {
         id: string
@@ -15,5 +15,7 @@ export interface Sessao {
     sala?: {
         id: string
         nome?: string
+        numAssentos?: number
     }
+    ingressos?: any[]
 }
