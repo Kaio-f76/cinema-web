@@ -5,6 +5,9 @@ export interface RelatorioFilme {
   totalIngressos: number
   receitaTotal: number
   totalSessoes: number
+  taxaOcupacao: number
+  tipoIngressoMaisVendido: string
+  totalClientesUnicos: number
 }
 
 export interface RelatorioFiltros {
