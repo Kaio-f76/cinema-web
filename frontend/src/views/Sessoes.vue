@@ -287,6 +287,7 @@ import sessaoService from '../services/sessaoService'
 import type { Sessao } from '../types/Sessao'
 import type { Filme } from '../types/Filme'
 import type { Sala } from '../types/Sala'
+import { apiDateToBr, apiDateToInput, inputDateToApi } from '../utils/date-utils'
 
 const { sessoes, loading, erro, listarSessoes, criarSessao, atualizarSessao, excluirSessao, limparErro } = useSessao()
 const { filmes, listarFilmes } = useFilme()
@@ -335,45 +336,8 @@ onMounted(async () => {
 })
 
 // Helpers
-const formatarData = (data?: string | number) => {
-  if (data === undefined || data === null || data === '') return ''
-  try {
-    let d: Date
-    if (typeof data === 'number') {
-      d = new Date(data)
-    } else if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
-      // String date-only "yyyy-MM-dd" → parsear como UTC
-      d = new Date(data + 'T00:00:00Z')
-    } else {
-      d = new Date(data)
-    }
-    if (isNaN(d.getTime())) return String(data)
-    return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' })
-  } catch {
-    return String(data)
-  }
-}
-
-const formatarDataISO = (data?: string | number) => {
-  if (data === undefined || data === null || data === '') return ''
-  try {
-    let d: Date
-    if (typeof data === 'number') {
-      d = new Date(data)
-    } else if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
-      d = new Date(data + 'T00:00:00Z')
-    } else {
-      d = new Date(data)
-    }
-    if (isNaN(d.getTime())) return String(data)
-    const yyyy = d.getUTCFullYear()
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
-    const dd = String(d.getUTCDate()).padStart(2, '0')
-    return `${yyyy}-${mm}-${dd}`
-  } catch {
-    return String(data)
-  }
-}
+const formatarData = (data?: string | number) => apiDateToBr(data)
+const formatarDataISO = (data?: string | number) => apiDateToInput(data)
 
 const getVendidos = (sessao: Sessao) => sessao.ingressos?.length ?? 0
 
@@ -434,7 +398,7 @@ const salvarSessao = async () => {
   erroModal.value = null
   try {
     const payload: Sessao = {
-      data: formData.value,
+      data: inputDateToApi(formData.value),
       horarioFilme: formHorario.value,
       filme: { id: formFilmeId.value },
       sala: { id: formSalaId.value },

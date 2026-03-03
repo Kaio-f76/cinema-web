@@ -94,7 +94,7 @@
 
             <!-- Saiba Mais -->
             <router-link
-              to="/filmes"
+              :to="`/filmes/${filmes[filmeAtualIndex]?.id}`"
               class="bg-gray-600 border border-white text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-transform transform active:scale-95"
             >
               Saiba mais

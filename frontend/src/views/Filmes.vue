@@ -401,6 +401,7 @@ import { useUsuario } from '../composables/useUsuario'
 import sessaoService from '../services/sessaoService'
 import type { Filme } from '../types/Filme'
 import type { Sessao } from '../types/Sessao'
+import { apiDateToBr } from '../utils/date-utils'
 
 const { filmes, loading, erro, listarFilmes, criarFilme, atualizarFilme, excluirFilme, limparErro } = useFilme()
 const { usuario } = useUsuario()
@@ -577,15 +578,7 @@ const getClassificacaoColor = (classificacao?: string): string => {
   return cores[classificacao || ''] || '#6b7280'
 }
 
-const formatarData = (data?: string): string => {
-  if (!data) return 'Data não definida'
-  try {
-    const d = new Date(data)
-    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-  } catch {
-    return data
-  }
-}
+const formatarData = (data?: string | number) => apiDateToBr(data)
 
 onMounted(() => {
   listarFilmes()
