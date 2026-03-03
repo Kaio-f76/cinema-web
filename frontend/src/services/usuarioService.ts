@@ -20,8 +20,16 @@ const usuarioService = {
     async getUsuario(): Promise<Usuario> {
         const response = await api.get<Usuario>("/usuarios/me")
         return response.data
-    }
+    },
 
+    async atualizar(id: string, dados: Partial<Usuario>): Promise<Usuario> {
+        const response = await api.put<Usuario>(`/usuarios/${id}`, dados)
+        return response.data
+    },
+
+    async excluir(id: string): Promise<void> {
+        await api.delete(`/usuarios/${id}`)
+    },
 };
 
 export default usuarioService;
