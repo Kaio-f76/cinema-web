@@ -108,7 +108,7 @@
     </header>
 
     <!-- MAIN -->
-    <main class="px-6 py-10">
+    <main :class="$route.name === 'Welcome' ? '' : 'px-6 py-10'">
       <router-view />
     </main>
 
