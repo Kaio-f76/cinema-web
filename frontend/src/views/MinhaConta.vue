@@ -113,19 +113,6 @@
           </div>
         </div>
 
-        <!-- Saldo (editar) -->
-        <div>
-          <label class="text-xs text-[#A8AAAD] mb-1 block">Saldo (R$)</label>
-          <input
-            v-model.number="form.saldo"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-2.5 text-sm focus:border-[#2FA36A] focus:outline-none transition placeholder:text-[#555]"
-          />
-        </div>
-
         <button
           type="submit"
           :disabled="salvando"
@@ -135,6 +122,80 @@
           {{ salvando ? 'Salvando...' : 'Salvar Alterações' }}
         </button>
       </form>
+    </div>
+
+    <!-- Meus Ingressos -->
+    <div class="bg-[#131516] border border-[#252829] rounded-2xl p-6 mb-6">
+      <div class="flex items-center gap-2 mb-5">
+        <Ticket class="w-5 h-5 text-[#2FA36A]" />
+        <h3 class="font-semibold text-lg">Meus Ingressos</h3>
+      </div>
+
+      <div v-if="carregandoIngressos" class="text-center py-8">
+        <div class="inline-block w-6 h-6 border-3 border-[#2FA36A] border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-[#A8AAAD] mt-2 text-sm">Carregando ingressos...</p>
+      </div>
+
+      <div v-else-if="ingressosEnriquecidos.length === 0" class="text-center py-8">
+        <Ticket class="w-12 h-12 text-[#252829] mx-auto mb-3" />
+        <p class="text-[#A8AAAD] text-sm">Você ainda não comprou nenhum ingresso.</p>
+      </div>
+
+      <div v-else class="space-y-3">
+        <div
+          v-for="ing in ingressosEnriquecidos"
+          :key="ing.id"
+          class="bg-[#0D0F10] border border-[#252829] rounded-xl p-4 flex items-center gap-4 hover:border-[#2FA36A]/40 transition"
+        >
+          <!-- Poster mini -->
+          <div class="w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
+            <img
+              v-if="ing.imagemUrl"
+              :src="`/filmes/${ing.imagemUrl}`"
+              :alt="ing.nomeFilme"
+              class="w-full h-full object-cover"
+            />
+            <div v-else class="w-full h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
+              <Film class="w-5 h-5 text-white/20" />
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-sm truncate">{{ ing.nomeFilme || 'Filme' }}</h4>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#A8AAAD]">
+              <span v-if="ing.dataSessao" class="flex items-center gap-1">
+                <Calendar class="w-3 h-3" />
+                {{ ing.dataSessao }}
+              </span>
+              <span v-if="ing.horario" class="flex items-center gap-1">
+                <Clock class="w-3 h-3" />
+                {{ ing.horario }}
+              </span>
+              <span v-if="ing.salaNome" class="flex items-center gap-1">
+                <Monitor class="w-3 h-3" />
+                {{ ing.salaNome }}
+              </span>
+              <span v-if="ing.assentoLabel" class="flex items-center gap-1 font-semibold text-white">
+                <Armchair class="w-3 h-3 text-[#2FA36A]" />
+                {{ ing.assentoLabel }}
+              </span>
+            </div>
+            <div class="flex items-center gap-3 mt-1.5">
+              <span v-if="ing.tipoIngresso" class="text-xs px-2 py-0.5 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] border border-[#3b82f6]/30">
+                {{ ing.tipoIngresso }}
+              </span>
+              <span v-if="ing.dataCompra" class="text-xs text-[#555]">Comprado em {{ ing.dataCompra }}</span>
+            </div>
+          </div>
+
+          <!-- Valor -->
+          <div class="text-right flex-shrink-0">
+            <p class="text-[#2FA36A] font-bold text-sm">R$ {{ (ing.valorI ?? 0).toFixed(2) }}</p>
+            <p v-if="ing.valorDesconto" class="text-[#A8AAAD] text-xs line-through">R$ {{ ((ing.valorI ?? 0) + ing.valorDesconto).toFixed(2) }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Zona de perigo -->
@@ -198,9 +259,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle } from 'lucide-vue-next'
+import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle, Ticket, Film, Calendar, Clock, Monitor, Armchair } from 'lucide-vue-next'
 import { useUsuario } from '../composables/useUsuario'
 import usuarioService from '../services/usuarioService'
+import ingressoService from '../services/ingressoService'
+import sessaoService from '../services/sessaoService'
+import { apiDateToBr } from '../utils/date-utils'
 
 const router = useRouter()
 const { usuario, setUsuario, clearUsuario } = useUsuario()
@@ -209,7 +273,6 @@ const form = ref({
   nome: '',
   email: '',
   senha: '',
-  saldo: 0,
 })
 const mostrarSenha = ref(false)
 const salvando = ref(false)
@@ -218,6 +281,24 @@ const modalExclusao = ref(false)
 const erro = ref('')
 const sucesso = ref('')
 
+// Ingressos enriquecidos
+interface IngressoEnriquecido {
+  id?: string
+  nomeFilme?: string
+  imagemUrl?: string
+  dataSessao?: string
+  horario?: string
+  salaNome?: string
+  assentoLabel?: string
+  tipoIngresso?: string
+  valorI?: number
+  valorDesconto?: number
+  dataCompra?: string
+}
+
+const carregandoIngressos = ref(false)
+const ingressosEnriquecidos = ref<IngressoEnriquecido[]>([])
+
 const iniciais = computed(() => {
   const nome = usuario.value?.nome || ''
   const partes = nome.trim().split(/\s+/)
@@ -225,13 +306,70 @@ const iniciais = computed(() => {
   return nome.slice(0, 2).toUpperCase()
 })
 
+const carregarIngressos = async () => {
+  if (!usuario.value?.id) return
+  carregandoIngressos.value = true
+  try {
+    const ingressos = await ingressoService.buscarPorUsuario(usuario.value.id)
+
+    // Buscar sessões únicas
+    const sessaoIds = [...new Set(ingressos.map(i => i.sessaoId).filter(Boolean))] as string[]
+    const sessaoMap = new Map<string, { nomeFilme?: string; imagemUrl?: string; data?: string; horario?: string; salaNome?: string; assentosMap: Map<string, string> }>()
+
+    await Promise.all(
+      sessaoIds.map(async (sId) => {
+        try {
+          const sessao = await sessaoService.buscarPorId(sId)
+          const assentosMap = new Map<string, string>()
+          // Buscar assentos da sessão para mapear assentoSessaoId → label
+          try {
+            const assentos = await sessaoService.listarAssentos(sId)
+            assentos.forEach(a => {
+              assentosMap.set(a.id, `${a.fila}${a.numero}`)
+            })
+          } catch { /* ignore */ }
+          sessaoMap.set(sId, {
+            nomeFilme: sessao.filme?.nome,
+            imagemUrl: sessao.filme?.imagemUrl,
+            data: sessao.data,
+            horario: sessao.horarioFilme,
+            salaNome: sessao.sala?.nome,
+            assentosMap,
+          })
+        } catch { /* ignore */ }
+      })
+    )
+
+    ingressosEnriquecidos.value = ingressos.map(ing => {
+      const info = ing.sessaoId ? sessaoMap.get(ing.sessaoId) : undefined
+      return {
+        id: ing.id,
+        nomeFilme: info?.nomeFilme,
+        imagemUrl: info?.imagemUrl,
+        dataSessao: info?.data ? apiDateToBr(info.data) : undefined,
+        horario: info?.horario,
+        salaNome: info?.salaNome,
+        assentoLabel: ing.assentoSessaoId && info?.assentosMap ? info.assentosMap.get(ing.assentoSessaoId) : undefined,
+        tipoIngresso: ing.tipoIngresso,
+        valorI: ing.valorI,
+        valorDesconto: ing.valorDesconto,
+        dataCompra: ing.dataCompra ? apiDateToBr(ing.dataCompra) : undefined,
+      }
+    })
+  } catch (e) {
+    console.error('Erro ao carregar ingressos:', e)
+  } finally {
+    carregandoIngressos.value = false
+  }
+}
+
 onMounted(() => {
   if (usuario.value) {
     form.value.nome = usuario.value.nome || ''
     form.value.email = usuario.value.email || ''
-    form.value.saldo = usuario.value.saldo ?? 0
     form.value.senha = ''
   }
+  carregarIngressos()
 })
 
 const salvarAlteracoes = async () => {
@@ -245,7 +383,6 @@ const salvarAlteracoes = async () => {
     const payload: Record<string, unknown> = {
       nome: form.value.nome,
       email: form.value.email,
-      saldo: form.value.saldo,
     }
     if (form.value.senha.trim()) {
       payload.senha = form.value.senha

@@ -9,6 +9,9 @@ export const GENEROS = [
   'Fantasia',
   'Documentário',
   'Policial',
+  'Romance',
+  'Animação',
+  'Musical',
 ] as const
 
 export type Genero = (typeof GENEROS)[number]
