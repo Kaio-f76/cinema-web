@@ -18,7 +18,7 @@ const routes = [
     { path: '/cadastro', name: 'Cadastro', component: Cadastro },
     { path: '/login', name: 'Login', component: Login },
     { path: '/filmes', name: 'Filmes', component: Filmes, meta: { requiresAuth: true } },
-    { path: '/filmes/:id', name: 'Detalhes', component: Detalhes },
+    { path: '/filmes/:id', name: 'Detalhes', component: Detalhes, meta: { requiresAuth: true } },
     { path: '/salas', name: 'Salas', component: Salas, meta: { requiresAuth: true } },
     { path: '/sessoes', name: 'Sessoes', component: Sessoes, meta: { requiresAuth: true } },
     { path: '/ingressos/:sessaoId', name: 'Ingressos', component: Ingressos, meta: { requiresAuth: true } },

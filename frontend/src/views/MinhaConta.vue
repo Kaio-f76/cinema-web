@@ -145,55 +145,133 @@
         <div
           v-for="ing in ingressosEnriquecidos"
           :key="ing.id"
-          class="bg-[#0D0F10] border border-[#252829] rounded-xl p-4 flex items-center gap-4 hover:border-[#2FA36A]/40 transition"
+          class="bg-[#0D0F10] border border-[#252829] rounded-xl overflow-hidden hover:border-[#2FA36A]/40 transition"
         >
-          <!-- Poster mini -->
-          <div class="w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
-            <img
-              v-if="ing.imagemUrl"
-              :src="`/filmes/${ing.imagemUrl}`"
-              :alt="ing.nomeFilme"
-              class="w-full h-full object-cover"
-            />
-            <div v-else class="w-full h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
-              <Film class="w-5 h-5 text-white/20" />
+          <!-- Cabeçalho clicável -->
+          <div
+            class="p-4 flex items-center gap-4 cursor-pointer select-none"
+            @click="toggleIngresso(ing.id)"
+          >
+            <!-- Poster mini -->
+            <div class="w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
+              <img
+                v-if="ing.imagemUrl"
+                :src="`/filmes/${ing.imagemUrl}`"
+                :alt="ing.nomeFilme"
+                class="w-full h-full object-cover"
+              />
+              <div v-else class="w-full h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
+                <Film class="w-5 h-5 text-white/20" />
+              </div>
+            </div>
+
+            <!-- Info resumido -->
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-sm truncate">{{ ing.nomeFilme || 'Filme' }}</h4>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#A8AAAD]">
+                <span v-if="ing.dataSessao" class="flex items-center gap-1">
+                  <Calendar class="w-3 h-3" />
+                  {{ ing.dataSessao }}
+                </span>
+                <span v-if="ing.horario" class="flex items-center gap-1">
+                  <Clock class="w-3 h-3" />
+                  {{ ing.horario }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Valor + seta -->
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <div class="text-right">
+                <p class="text-[#2FA36A] font-bold text-sm">R$ {{ (ing.valorI ?? 0).toFixed(2) }}</p>
+                <p v-if="ing.valorDesconto" class="text-[#A8AAAD] text-xs line-through">R$ {{ ((ing.valorI ?? 0) + ing.valorDesconto).toFixed(2) }}</p>
+              </div>
+              <ChevronDown
+                class="w-5 h-5 text-[#A8AAAD] transition-transform duration-300"
+                :class="{ 'rotate-180': ingressoExpandido === ing.id }"
+              />
             </div>
           </div>
 
-          <!-- Info -->
-          <div class="flex-1 min-w-0">
-            <h4 class="font-semibold text-sm truncate">{{ ing.nomeFilme || 'Filme' }}</h4>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#A8AAAD]">
-              <span v-if="ing.dataSessao" class="flex items-center gap-1">
-                <Calendar class="w-3 h-3" />
-                {{ ing.dataSessao }}
-              </span>
-              <span v-if="ing.horario" class="flex items-center gap-1">
-                <Clock class="w-3 h-3" />
-                {{ ing.horario }}
-              </span>
-              <span v-if="ing.salaNome" class="flex items-center gap-1">
-                <Monitor class="w-3 h-3" />
-                {{ ing.salaNome }}
-              </span>
-              <span v-if="ing.assentoLabel" class="flex items-center gap-1 font-semibold text-white">
-                <Armchair class="w-3 h-3 text-[#2FA36A]" />
-                {{ ing.assentoLabel }}
-              </span>
-            </div>
-            <div class="flex items-center gap-3 mt-1.5">
-              <span v-if="ing.tipoIngresso" class="text-xs px-2 py-0.5 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] border border-[#3b82f6]/30">
-                {{ ing.tipoIngresso }}
-              </span>
-              <span v-if="ing.dataCompra" class="text-xs text-[#555]">Comprado em {{ ing.dataCompra }}</span>
-            </div>
-          </div>
+          <!-- Detalhes expandidos -->
+          <transition name="expand">
+            <div v-if="ingressoExpandido === ing.id" class="border-t border-[#252829] bg-[#0A0D0C] px-4 py-4">
+              <div class="flex gap-5">
+                <!-- Poster grande -->
+                <div class="w-28 h-40 rounded-xl overflow-hidden flex-shrink-0">
+                  <img
+                    v-if="ing.imagemUrl"
+                    :src="`/filmes/${ing.imagemUrl}`"
+                    :alt="ing.nomeFilme"
+                    class="w-full h-full object-cover"
+                  />
+                  <div v-else class="w-full h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
+                    <Film class="w-8 h-8 text-white/20" />
+                  </div>
+                </div>
 
-          <!-- Valor -->
-          <div class="text-right flex-shrink-0">
-            <p class="text-[#2FA36A] font-bold text-sm">R$ {{ (ing.valorI ?? 0).toFixed(2) }}</p>
-            <p v-if="ing.valorDesconto" class="text-[#A8AAAD] text-xs line-through">R$ {{ ((ing.valorI ?? 0) + ing.valorDesconto).toFixed(2) }}</p>
-          </div>
+                <!-- Dados -->
+                <div class="flex-1 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Filme</span>
+                    <span class="text-white font-medium flex items-center gap-1.5">
+                      <Film class="w-3.5 h-3.5 text-[#2FA36A]" />
+                      {{ ing.nomeFilme || '—' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Sala</span>
+                    <span class="text-white font-medium flex items-center gap-1.5">
+                      <Monitor class="w-3.5 h-3.5 text-[#2FA36A]" />
+                      {{ ing.salaNome || '—' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Data da Sessão</span>
+                    <span class="text-white font-medium flex items-center gap-1.5">
+                      <Calendar class="w-3.5 h-3.5 text-[#2FA36A]" />
+                      {{ ing.dataSessao || '—' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Horário</span>
+                    <span class="text-white font-medium flex items-center gap-1.5">
+                      <Clock class="w-3.5 h-3.5 text-[#2FA36A]" />
+                      {{ ing.horario || '—' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Assento</span>
+                    <span class="text-white font-medium flex items-center gap-1.5">
+                      <Armchair class="w-3.5 h-3.5 text-[#2FA36A]" />
+                      {{ ing.assentoLabel || '—' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Tipo de Ingresso</span>
+                    <span v-if="ing.tipoIngresso" class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#3b82f6]/15 text-[#3b82f6] border border-[#3b82f6]/30">
+                      {{ ing.tipoIngresso }}
+                    </span>
+                    <span v-else class="text-white font-medium">—</span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Valor Pago</span>
+                    <span class="text-[#2FA36A] font-bold">R$ {{ (ing.valorI ?? 0).toFixed(2) }}</span>
+                  </div>
+                  <div>
+                    <span class="text-[#555] text-xs block mb-0.5">Desconto</span>
+                    <span class="text-white font-medium">
+                      {{ ing.valorDesconto ? `R$ ${ing.valorDesconto.toFixed(2)}` : 'Nenhum' }}
+                    </span>
+                  </div>
+                  <div class="col-span-2">
+                    <span class="text-[#555] text-xs block mb-0.5">Data da Compra</span>
+                    <span class="text-white font-medium">{{ ing.dataCompra || '—' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
     </div>
@@ -259,7 +337,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle, Ticket, Film, Calendar, Clock, Monitor, Armchair } from 'lucide-vue-next'
+import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle, Ticket, Film, Calendar, Clock, Monitor, Armchair, ChevronDown } from 'lucide-vue-next'
 import { useUsuario } from '../composables/useUsuario'
 import usuarioService from '../services/usuarioService'
 import ingressoService from '../services/ingressoService'
@@ -267,7 +345,7 @@ import sessaoService from '../services/sessaoService'
 import { apiDateToBr } from '../utils/date-utils'
 
 const router = useRouter()
-const { usuario, setUsuario, clearUsuario } = useUsuario()
+const { usuario, setUsuario, clearUsuario, fetchUsuario } = useUsuario()
 
 const form = ref({
   nome: '',
@@ -280,6 +358,12 @@ const excluindo = ref(false)
 const modalExclusao = ref(false)
 const erro = ref('')
 const sucesso = ref('')
+const ingressoExpandido = ref<string | null>(null)
+
+const toggleIngresso = (id?: string) => {
+  if (!id) return
+  ingressoExpandido.value = ingressoExpandido.value === id ? null : id
+}
 
 // Ingressos enriquecidos
 interface IngressoEnriquecido {
@@ -314,27 +398,18 @@ const carregarIngressos = async () => {
 
     // Buscar sessões únicas
     const sessaoIds = [...new Set(ingressos.map(i => i.sessaoId).filter(Boolean))] as string[]
-    const sessaoMap = new Map<string, { nomeFilme?: string; imagemUrl?: string; data?: string; horario?: string; salaNome?: string; assentosMap: Map<string, string> }>()
+    const sessaoMap = new Map<string, { nomeFilme?: string; imagemUrl?: string; data?: string; horario?: string; salaNome?: string }>()
 
     await Promise.all(
       sessaoIds.map(async (sId) => {
         try {
           const sessao = await sessaoService.buscarPorId(sId)
-          const assentosMap = new Map<string, string>()
-          // Buscar assentos da sessão para mapear assentoSessaoId → label
-          try {
-            const assentos = await sessaoService.listarAssentos(sId)
-            assentos.forEach(a => {
-              assentosMap.set(a.id, `${a.fila}${a.numero}`)
-            })
-          } catch { /* ignore */ }
           sessaoMap.set(sId, {
             nomeFilme: sessao.filme?.nome,
             imagemUrl: sessao.filme?.imagemUrl,
             data: sessao.data,
             horario: sessao.horarioFilme,
             salaNome: sessao.sala?.nome,
-            assentosMap,
           })
         } catch { /* ignore */ }
       })
@@ -342,6 +417,7 @@ const carregarIngressos = async () => {
 
     ingressosEnriquecidos.value = ingressos.map(ing => {
       const info = ing.sessaoId ? sessaoMap.get(ing.sessaoId) : undefined
+
       return {
         id: ing.id,
         nomeFilme: info?.nomeFilme,
@@ -349,7 +425,7 @@ const carregarIngressos = async () => {
         dataSessao: info?.data ? apiDateToBr(info.data) : undefined,
         horario: info?.horario,
         salaNome: info?.salaNome,
-        assentoLabel: ing.assentoSessaoId && info?.assentosMap ? info.assentosMap.get(ing.assentoSessaoId) : undefined,
+        assentoLabel: ing.assentoFila && ing.assentoNumero != null ? `${ing.assentoFila}${ing.assentoNumero}` : undefined,
         tipoIngresso: ing.tipoIngresso,
         valorI: ing.valorI,
         valorDesconto: ing.valorDesconto,
@@ -363,7 +439,10 @@ const carregarIngressos = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Busca dados atualizados do servidor (saldo, nome, etc.)
+  await fetchUsuario()
+
   if (usuario.value) {
     form.value.nome = usuario.value.nome || ''
     form.value.email = usuario.value.email || ''
@@ -418,3 +497,23 @@ const excluirConta = async () => {
   }
 }
 </script>
+
+<style scoped>
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 400px;
+  opacity: 1;
+}
+</style>

@@ -45,7 +45,8 @@
         </router-link>
 
         <router-link
-          :to="usuario ? '/salas' : '/login'"
+          v-if="usuario?.tipoUsuario === 'ADMINISTRADOR'"
+          to="/salas"
           class="px-4 py-2 rounded-lg text-sm font-medium transition"
           :class="$route.path === '/salas' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
         >
