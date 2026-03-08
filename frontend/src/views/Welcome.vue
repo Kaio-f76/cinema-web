@@ -139,69 +139,71 @@
     </div>
 
     <!-- LISTAGEM DE FILMES -->
-    <section v-if="!loading && filmes.length > 0" class="max-w-7xl mx-auto px-6 py-12">
-      <div class="mb-8">
-        <h2 class="text-3xl font-bold mb-1" style="font-family: 'Poppins', sans-serif;">
+    <section v-if="!loading && filmes.length > 0" class="max-w-7xl mx-auto px-6 py-10">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-0.5" style="font-family: 'Poppins', sans-serif;">
         Confira os filmes em cartaz
         </h2>
+        <p class="text-sm text-[#A8AAAD]">Escolha seu filme favorito e garanta seu ingresso</p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4">
         <router-link
           v-for="filme in filmes"
           :key="filme.id"
           :to="usuario ? `/filmes/${filme.id}` : '/login'"
-          class="group cursor-pointer block"
+          class="group cursor-pointer block film-card"
         >
           <!-- Card poster -->
-          <div class="relative rounded-xl overflow-hidden aspect-[2/3] mb-3">
+          <div class="relative rounded-lg overflow-hidden aspect-[2/3] mb-2 shadow-md group-hover:shadow-xl group-hover:shadow-[#2FA36A]/20 transition-all duration-300">
             <img
               v-if="filme.imagemUrl"
               :src="`/filmes/${filme.imagemUrl}`"
               :alt="filme.nome"
-              class="absolute inset-0 w-full h-full object-cover"
+              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div v-else class="absolute inset-0" :style="{ background: getGradient(filme.genero) }"></div>
 
             <!-- Film icon overlay (só sem imagem) -->
-            <div v-if="!filme.imagemUrl" class="absolute inset-0 flex items-center justify-center opacity-20">
-              <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0 1 18 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-2.625 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0 1 18 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 0 1 6 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25c0 .621.504 1.125 1.125 1.125M18 10.875c0 .621-.504 1.125-1.125 1.125m0 0v1.5c0 .621.504 1.125 1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5m14.25 0h1.5" />
+            <div v-if="!filme.imagemUrl" class="absolute inset-0 flex items-center justify-center opacity-15">
+              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
               </svg>
             </div>
 
             <!-- Classification badge -->
             <div
-              class="absolute top-3 left-3 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+              class="absolute top-2 left-2 w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold shadow-sm"
               :style="{ backgroundColor: getClassificacaoColor(filme.classificacao) }"
             >
               {{ filme.classificacao || 'L' }}
             </div>
 
-            <!-- Duration badge -->
-            <div v-if="filme.duracao" class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-md text-xs flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <!-- Bottom gradient overlay -->
+            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+
+            <!-- Duration badge (bottom) -->
+            <div v-if="filme.duracao" class="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] flex items-center gap-0.5">
+              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
               </svg>
               {{ filme.duracao }}min
             </div>
 
             <!-- Hover overlay -->
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-              <span class="bg-[#2FA36A] px-4 py-2 rounded-lg text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <div class="absolute inset-0 bg-[#2FA36A]/0 group-hover:bg-[#2FA36A]/20 transition-all duration-300 flex items-center justify-center">
+              <span class="bg-[#2FA36A] px-3 py-1.5 rounded-md text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-3 group-hover:translate-y-0 shadow-lg">
                 Ver Detalhes
               </span>
             </div>
           </div>
 
           <!-- Info -->
-          <h3 class="font-semibold text-sm truncate group-hover:text-[#2FA36A] transition">{{ filme.nome }}</h3>
-          <p class="text-xs text-[#A8AAAD] mt-1">
-            <span v-if="filme.duracao">{{ filme.duracao }} min</span>
-            <span v-if="filme.duracao && filme.genero"> · </span>
+          <h3 class="font-semibold text-xs truncate group-hover:text-[#2FA36A] transition-colors duration-200">{{ filme.nome }}</h3>
+          <p class="text-[10px] text-[#A8AAAD] mt-0.5 truncate">
             <span v-if="filme.genero">{{ filme.genero }}</span>
           </p>
-          <p class="text-[#2FA36A] font-bold text-sm mt-1">
+          <p class="text-[#2FA36A] font-bold text-xs mt-0.5">
             R$ {{ (filme.valorFilme ?? 0).toFixed(2) }}
           </p>
         </router-link>

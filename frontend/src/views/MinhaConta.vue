@@ -237,7 +237,7 @@
                     <span class="text-[#555] text-xs block mb-0.5">Horário</span>
                     <span class="text-white font-medium flex items-center gap-1.5">
                       <Clock class="w-3.5 h-3.5 text-[#2FA36A]" />
-                      {{ ing.horario || '—' }}
+                      {{ ing.horario || '—' }}<span v-if="ing.horarioTermino" class="text-[#A8AAAD]"> — {{ ing.horarioTermino }}</span>
                     </span>
                   </div>
                   <div>
@@ -268,11 +268,34 @@
                     <span class="text-[#555] text-xs block mb-0.5">Data da Compra</span>
                     <span class="text-white font-medium">{{ ing.dataCompra || '—' }}</span>
                   </div>
+                  <div class="col-span-2 pt-2">
+                    <button
+                      @click.stop="gerarQrCode(ing)"
+                      class="flex items-center gap-2 bg-[#2FA36A]/15 border border-[#2FA36A]/40 text-[#2FA36A] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2FA36A]/25 transition"
+                    >
+                      <QrCode class="w-4 h-4" />
+                      Gerar QR Code
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </transition>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal QR Code -->
+    <div v-if="qrCodeUrl" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="qrCodeUrl = ''">
+      <div class="bg-[#131516] border border-[#252829] rounded-2xl p-6 w-full max-w-sm text-center">
+        <h3 class="font-bold text-lg mb-4">QR Code do Ingresso</h3>
+        <div class="bg-white rounded-xl p-4 inline-block mb-4">
+          <img :src="qrCodeUrl" alt="QR Code" class="w-48 h-48" />
+        </div>
+        <p class="text-[#A8AAAD] text-xs mb-4">Apresente este QR Code na entrada do cinema.</p>
+        <button @click="qrCodeUrl = ''" class="bg-[#1A1C1E] border border-[#252829] px-6 py-2 rounded-lg hover:bg-[#252829] transition text-sm">
+          Fechar
+        </button>
       </div>
     </div>
 
@@ -337,7 +360,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle, Ticket, Film, Calendar, Clock, Monitor, Armchair, ChevronDown } from 'lucide-vue-next'
+import { Wallet, Pencil, Save, Eye, EyeOff, Trash2, AlertTriangle, Ticket, Film, Calendar, Clock, Monitor, Armchair, ChevronDown, QrCode } from 'lucide-vue-next'
 import { useUsuario } from '../composables/useUsuario'
 import usuarioService from '../services/usuarioService'
 import ingressoService from '../services/ingressoService'
@@ -359,6 +382,12 @@ const modalExclusao = ref(false)
 const erro = ref('')
 const sucesso = ref('')
 const ingressoExpandido = ref<string | null>(null)
+const qrCodeUrl = ref('')
+
+const gerarQrCode = (ing: IngressoEnriquecido) => {
+  const dados = `Ingresso: ${ing.id} | Filme: ${ing.nomeFilme} | Sessão: ${ing.dataSessao} ${ing.horario} | Assento: ${ing.assentoLabel} | Sala: ${ing.salaNome}`
+  qrCodeUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(dados)}`
+}
 
 const toggleIngresso = (id?: string) => {
   if (!id) return
@@ -372,6 +401,7 @@ interface IngressoEnriquecido {
   imagemUrl?: string
   dataSessao?: string
   horario?: string
+  horarioTermino?: string
   salaNome?: string
   assentoLabel?: string
   tipoIngresso?: string
@@ -398,17 +428,25 @@ const carregarIngressos = async () => {
 
     // Buscar sessões únicas
     const sessaoIds = [...new Set(ingressos.map(i => i.sessaoId).filter(Boolean))] as string[]
-    const sessaoMap = new Map<string, { nomeFilme?: string; imagemUrl?: string; data?: string; horario?: string; salaNome?: string }>()
+    const sessaoMap = new Map<string, { nomeFilme?: string; imagemUrl?: string; data?: string; horario?: string; horarioTermino?: string; salaNome?: string }>()
 
     await Promise.all(
       sessaoIds.map(async (sId) => {
         try {
           const sessao = await sessaoService.buscarPorId(sId)
+          // Calcular horário de término
+          let horarioTermino: string | undefined
+          if (sessao.horarioFilme && sessao.filme?.duracao) {
+            const [h, m] = sessao.horarioFilme.split(':').map(Number)
+            const totalMin = h * 60 + m + sessao.filme.duracao
+            horarioTermino = `${String(Math.floor(totalMin / 60) % 24).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`
+          }
           sessaoMap.set(sId, {
             nomeFilme: sessao.filme?.nome,
             imagemUrl: sessao.filme?.imagemUrl,
             data: sessao.data,
             horario: sessao.horarioFilme,
+            horarioTermino,
             salaNome: sessao.sala?.nome,
           })
         } catch { /* ignore */ }
@@ -424,6 +462,7 @@ const carregarIngressos = async () => {
         imagemUrl: info?.imagemUrl,
         dataSessao: info?.data ? apiDateToBr(info.data) : undefined,
         horario: info?.horario,
+        horarioTermino: info?.horarioTermino,
         salaNome: info?.salaNome,
         assentoLabel: ing.assentoFila && ing.assentoNumero != null ? `${ing.assentoFila}${ing.assentoNumero}` : undefined,
         tipoIngresso: ing.tipoIngresso,
