@@ -289,7 +289,7 @@ import type { AssentoStatus } from '../types/Assento'
 
 const route = useRoute()
 const router = useRouter()
-const { usuario } = useUsuario()
+const { usuario, fetchUsuario } = useUsuario()
 
 const voltar = () => {
   if (etapa.value === 3) {
@@ -440,6 +440,9 @@ const comprarIngressos = async () => {
 
     const totalReal = ingressosComprados.reduce((acc: number, ing: any) => acc + (ing.valorI ?? 0), 0)
     totalCompra.value = totalReal > 0 ? totalReal : total.value
+
+    // Atualizar saldo do usuário
+    await fetchUsuario()
 
     // Ir para confirmação
     etapa.value = 3

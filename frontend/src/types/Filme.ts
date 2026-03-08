@@ -10,5 +10,6 @@ export interface Filme {
     distribuidor?: string
     duracao?: number
     valorFilme?: number
-    imagemUrl?: string
+    sessoes?: Array<{ id?: string; data?: string; horarioFilme?: string }>
+    imagemUrl?: string // campo local (frontend-only)
 }

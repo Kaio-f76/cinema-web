@@ -14,8 +14,11 @@ api.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 440) {
-            //alert("Sessão expirada. Faça login novamente.");
-            router.push("/login");
+            // Só redireciona para /login se a rota atual exigir autenticação
+            const currentRoute = router.currentRoute.value
+            if (currentRoute.meta?.requiresAuth) {
+                router.push("/login");
+            }
         }
         return Promise.reject(error);
     }

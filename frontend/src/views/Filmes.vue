@@ -171,7 +171,7 @@
       class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
       @click.self="fecharDetalhes"
     >
-      <div class="bg-[#131516] border border-[#252829] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="bg-[#131516] border border-[#252829] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <!-- Header gradient -->
         <div class="relative h-48 overflow-hidden rounded-t-2xl">
           <img
@@ -225,6 +225,7 @@
           <div class="flex flex-wrap gap-4 text-sm text-[#A8AAAD] mb-6">
             <span v-if="filmeDetalhes.elenco"><strong class="text-white">Elenco:</strong> {{ filmeDetalhes.elenco }}</span>
             <span v-if="filmeDetalhes.distribuidor"><strong class="text-white">Distribuidora:</strong> {{ filmeDetalhes.distribuidor }}</span>
+            <span v-if="filmeDetalhes.dataLancamento"><strong class="text-white">Lançamento:</strong> {{ formatarDataLonga(filmeDetalhes.dataLancamento) }}</span>
           </div>
 
           <p class="text-[#2FA36A] text-xl font-bold mb-6">R$ {{ (filmeDetalhes.valorFilme ?? 0).toFixed(2) }}</p>
@@ -266,7 +267,7 @@
       class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
       @click.self="fecharModalFilme"
     >
-      <div class="bg-[#131516] border border-[#252829] rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="bg-[#131516] border border-[#252829] rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl font-bold mb-6" style="font-family: 'Poppins', sans-serif;">
           {{ editandoFilme ? 'Editar Filme' : 'Novo Filme' }}
         </h3>
@@ -278,9 +279,28 @@
           <textarea v-model="formFilme.descricao" placeholder="Descrição" rows="3"
             class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A] resize-none"></textarea>
 
+          <!-- Gêneros (checkboxes) -->
+          <div>
+            <label class="text-xs text-[#A8AAAD] mb-2 block">Gêneros</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <label
+                v-for="g in GENEROS"
+                :key="g"
+                class="flex items-center gap-2 bg-[#0D0F10] border rounded-lg px-3 py-2 cursor-pointer transition select-none"
+                :class="generosSelecionados.includes(g) ? 'border-[#2FA36A] text-white' : 'border-[#252829] text-[#A8AAAD] hover:border-[#3a3d40]'"
+              >
+                <input
+                  type="checkbox"
+                  :value="g"
+                  v-model="generosSelecionados"
+                  class="accent-[#2FA36A] w-4 h-4"
+                />
+                <span class="text-sm">{{ g }}</span>
+              </label>
+            </div>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
-            <input v-model="formFilme.genero" type="text" placeholder="Gênero"
-              class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
             <input v-model="formFilme.classificacao" type="text" placeholder="Classificação"
               class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
           </div>
@@ -299,8 +319,15 @@
               class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
           </div>
 
-          <input v-model="formFilme.distribuidor" type="text" placeholder="Distribuidor"
-            class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+          <div class="grid grid-cols-2 gap-4">
+            <input v-model="formFilme.distribuidor" type="text" placeholder="Distribuidor"
+              class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+            <div>
+              <label class="text-xs text-[#A8AAAD] mb-1 block">Data de Lançamento</label>
+              <input v-model="formFilme.dataLancamento" type="date"
+                class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 w-full focus:outline-none focus:border-[#2FA36A]" />
+            </div>
+          </div>
 
           <div>
             <label class="text-xs text-[#A8AAAD] mb-2 block">Poster do Filme</label>
@@ -319,7 +346,6 @@
               >
                 ✕
               </button>
-              <p class="text-xs text-[#A8AAAD] mt-1 text-center truncate max-w-[96px]">{{ formFilme.imagemUrl }}</p>
             </div>
 
             <!-- Grid de imagens disponíveis -->
@@ -401,6 +427,8 @@ import { useUsuario } from '../composables/useUsuario'
 import sessaoService from '../services/sessaoService'
 import type { Filme } from '../types/Filme'
 import type { Sessao } from '../types/Sessao'
+import { apiDateToBr, apiDateToLongBr } from '../utils/date-utils'
+import { GENEROS } from '../constants/generos'
 
 const { filmes, loading, erro, listarFilmes, criarFilme, atualizarFilme, excluirFilme, limparErro } = useFilme()
 const { usuario } = useUsuario()
@@ -421,7 +449,9 @@ const classificacoes = ['L', '10', '12', '14', '16', '18']
 const generosDisponiveis = computed(() => {
   const generos = new Set<string>()
   filmes.value.forEach(f => {
-    if (f.genero) generos.add(f.genero)
+    if (f.genero) {
+      f.genero.split(',').map(g => g.trim()).filter(Boolean).forEach(g => generos.add(g))
+    }
   })
   return Array.from(generos).sort()
 })
@@ -430,7 +460,9 @@ const filmesFiltrados = computed(() => {
   let resultado = [...filmes.value]
 
   if (filtroGenero.value) {
-    resultado = resultado.filter(f => f.genero === filtroGenero.value)
+    resultado = resultado.filter(f =>
+      f.genero?.split(',').map(g => g.trim()).includes(filtroGenero.value)
+    )
   }
   if (filtroClassificacao.value) {
     resultado = resultado.filter(f => f.classificacao === filtroClassificacao.value)
@@ -483,16 +515,21 @@ const editandoFilme = ref(false)
 const salvandoFilme = ref(false)
 const filmeEditandoId = ref<string | null>(null)
 const formFilme = ref<Partial<Filme>>({})
+const generosSelecionados = ref<string[]>([])
 
 const abrirModalFilme = (filme?: Filme) => {
   if (filme) {
     editandoFilme.value = true
     filmeEditandoId.value = filme.id || null
     formFilme.value = { ...filme }
+    generosSelecionados.value = filme.genero
+      ? filme.genero.split(',').map(g => g.trim()).filter(Boolean)
+      : []
   } else {
     editandoFilme.value = false
     filmeEditandoId.value = null
     formFilme.value = {}
+    generosSelecionados.value = []
   }
   modalFilme.value = true
 }
@@ -506,6 +543,7 @@ const fecharModalFilme = () => {
 
 const salvarFilme = async () => {
   salvandoFilme.value = true
+  formFilme.value.genero = generosSelecionados.value.join(',')
   try {
     if (editandoFilme.value && filmeEditandoId.value) {
       await atualizarFilme(filmeEditandoId.value, formFilme.value)
@@ -577,15 +615,8 @@ const getClassificacaoColor = (classificacao?: string): string => {
   return cores[classificacao || ''] || '#6b7280'
 }
 
-const formatarData = (data?: string): string => {
-  if (!data) return 'Data não definida'
-  try {
-    const d = new Date(data)
-    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-  } catch {
-    return data
-  }
-}
+const formatarData = (data?: string | number) => apiDateToBr(data)
+const formatarDataLonga = (data?: string | number) => apiDateToLongBr(data)
 
 onMounted(() => {
   listarFilmes()

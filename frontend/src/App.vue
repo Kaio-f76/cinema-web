@@ -45,11 +45,29 @@
         </router-link>
 
         <router-link
-          :to="usuario ? '/salas' : '/login'"
+          v-if="usuario?.tipoUsuario === 'ADMINISTRADOR'"
+          to="/salas"
           class="px-4 py-2 rounded-lg text-sm font-medium transition"
           :class="$route.path === '/salas' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
         >
           Salas
+        </router-link>
+
+        <router-link
+          :to="usuario ? '/sessoes' : '/login'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/sessoes' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
+        >
+          Sessões
+        </router-link>
+
+        <router-link
+          v-if="usuario?.tipoUsuario === 'ADMINISTRADOR'"
+          to="/relatorios"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition"
+          :class="$route.path === '/relatorios' ? 'bg-[#2FA36A] text-white' : 'text-[#A8AAAD] hover:bg-[#1A1C1E] hover:text-white'"
+        >
+          Relatórios
         </router-link>
       </nav>
 
@@ -64,6 +82,16 @@
         >
           <User class="w-4 h-4" />
           Entrar
+        </router-link>
+
+        <!-- PERFIL + LOGOUT -->
+        <router-link
+          v-if="usuario"
+          to="/minha-conta"
+          class="flex items-center gap-2 bg-[#1A1C1E] border border-[#252829] px-4 py-2 rounded-lg hover:bg-[#252829] transition"
+        >
+          <User class="w-4 h-4 text-[#A8AAAD]" />
+          <span class="text-sm font-medium">{{ usuario.nome?.split(' ')[0] }}</span>
         </router-link>
 
         <!-- LOGOUT -->
@@ -81,7 +109,7 @@
     </header>
 
     <!-- MAIN -->
-    <main class="px-6 py-10">
+    <main :class="$route.name === 'Welcome' ? '' : 'px-6 py-10'">
       <router-view />
     </main>
 

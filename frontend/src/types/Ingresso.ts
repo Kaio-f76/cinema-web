@@ -3,6 +3,8 @@ export interface Ingresso {
     usuarioId?: string
     sessaoId?: string
     assentoSessaoId?: string
+    assentoFila?: string
+    assentoNumero?: number
     tipoIngresso?: string
     valorI?: number
     valorDesconto?: number
