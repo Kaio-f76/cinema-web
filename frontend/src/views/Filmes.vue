@@ -20,6 +20,19 @@
       </button>
     </div>
 
+    <!-- Pesquisa -->
+    <div class="mb-6">
+      <div class="relative max-w-sm">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A8AAAD]" />
+        <input
+          v-model="pesquisa"
+          type="text"
+          placeholder="Buscar filme..."
+          class="w-full bg-[#131516] border border-[#252829] rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#2FA36A] placeholder-[#A8AAAD]/50"
+        />
+      </div>
+    </div>
+
     <!-- Filtros -->
     <div class="flex flex-wrap gap-4 mb-6">
       <!-- Gênero -->
@@ -421,7 +434,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { Film, Clock, Plus, Pencil, Trash2, X, ChevronRight, ArrowLeft, Check } from 'lucide-vue-next'
+import { Film, Clock, Plus, Pencil, Trash2, X, ChevronRight, ArrowLeft, Check, Search } from 'lucide-vue-next'
 import { useFilme } from '../composables/useFilme'
 import { useUsuario } from '../composables/useUsuario'
 import sessaoService from '../services/sessaoService'
@@ -440,6 +453,7 @@ const imagensDisponiveis = computed(() => {
 })
 
 // Filtros
+const pesquisa = ref('')
 const filtroGenero = ref('')
 const filtroClassificacao = ref('')
 const ordenacao = ref('nome-asc')
@@ -459,6 +473,10 @@ const generosDisponiveis = computed(() => {
 const filmesFiltrados = computed(() => {
   let resultado = [...filmes.value]
 
+  if (pesquisa.value) {
+    const termo = pesquisa.value.toLowerCase()
+    resultado = resultado.filter(f => f.nome?.toLowerCase().includes(termo))
+  }
   if (filtroGenero.value) {
     resultado = resultado.filter(f =>
       f.genero?.split(',').map(g => g.trim()).includes(filtroGenero.value)

@@ -327,6 +327,13 @@ onMounted(async () => {
     ])
     sessao.value = sessaoData
     assentos.value = assentosData
+
+    // Verificar se há assentos disponíveis
+    const disponiveis = assentosData.filter((a: AssentoStatus) => !a.ocupado)
+    if (disponiveis.length === 0) {
+      erroMsg.value = 'Sala lotada. Todos os assentos estão ocupados.'
+    }
+
     console.log('Sessão carregada:', sessaoData)
     console.log('valorFilme:', sessaoData.filme?.valorFilme)
   } catch (e: any) {
@@ -455,7 +462,9 @@ const comprarIngressos = async () => {
         selecionados.value = new Set()
       } catch {}
     } else if (e.response?.status === 400) {
-      erroMsg.value = e.response?.data?.message || 'Saldo insuficiente ou dados inválidos.'
+      erroMsg.value = e.response?.data?.message || e.response?.data || 'Saldo insuficiente ou dados inválidos.'
+      setTimeout(() => router.push('/'), 1000)
+      return
     } else {
       erroMsg.value = e.response?.data?.message || 'Erro ao comprar ingressos.'
     }

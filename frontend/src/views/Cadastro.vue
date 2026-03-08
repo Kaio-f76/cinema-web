@@ -68,7 +68,7 @@ const handleCadastro = async () => {
     })
     sucesso.value = true
     setUsuario(usuario)
-    router.push('/filmes')
+    router.push('/')
   } catch (e: any) {
     if (e.response?.status === 400) {
       erro.value = e.response.data // "Email já cadastrado." ou "Erro ao cadastrar."
