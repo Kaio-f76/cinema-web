@@ -21,7 +21,7 @@
       <div class="relative w-full h-[50vh] sm:h-[55vh] lg:h-[60vh] overflow-hidden">
         <img
           v-if="filme.imagemUrl"
-          :src="`/filmes/${filme.imagemUrl}`"
+          :src="filme.imagemUrl"
           :alt="filme.nome"
           class="absolute inset-0 w-full h-full object-cover"
         />

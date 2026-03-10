@@ -185,6 +185,16 @@
             <input v-model="formFilme.diretor" type="text" placeholder="Diretor" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
           </div>
 
+          <input v-model="formFilme.elenco" type="text" placeholder="Elenco (ex: Ator 1, Ator 2)" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+
+          <div class="grid grid-cols-2 gap-4">
+            <input v-model="formFilme.distribuidor" type="text" placeholder="Distribuidor" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-[#A8AAAD]">Data de Lançamento</label>
+              <input v-model="formFilme.dataLancamento" type="date" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+            </div>
+          </div>
+
           <div class="mt-2">
             <label class="text-xs text-[#A8AAAD] mb-2 block">Capa do Filme (Upload)</label>
             <div class="flex items-center gap-4 bg-[#0D0F10] border border-[#252829] rounded-lg p-4">

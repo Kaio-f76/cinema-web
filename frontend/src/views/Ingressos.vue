@@ -146,7 +146,7 @@
           <div class="relative h-32 overflow-hidden">
             <img
               v-if="sessao.filme?.imagemUrl"
-              :src="`/filmes/${sessao.filme.imagemUrl}`"
+              :src="getImagemUrl(sessao.filme.imagemUrl)"
               :alt="sessao.filme.nome"
               class="absolute inset-0 w-full h-full object-cover"
             />
@@ -290,6 +290,13 @@ import type { AssentoStatus } from '../types/Assento'
 const route = useRoute()
 const router = useRouter()
 const { usuario, fetchUsuario } = useUsuario()
+
+const UPLOADS_URL = 'http://localhost:8080/uploads/'
+
+const getImagemUrl = (url?: string): string => {
+  if (!url) return ''
+  return url.startsWith('http') ? url : `${UPLOADS_URL}${url}`
+}
 
 const voltar = () => {
   if (etapa.value === 3) {
