@@ -171,7 +171,12 @@
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <input v-model="formFilme.classificacao" type="text" placeholder="Classificação (L, 10, 12...)" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
+            <div class="flex flex-col gap-1">
+              <select v-model="formFilme.classificacao" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A] text-white">
+                <option value="" disabled selected>Selecionar Classificação</option>
+                <option v-for="c in classificacoes" :key="c" :value="c">{{ c }}</option>
+              </select>
+            </div>
             <input v-model.number="formFilme.valorFilme" type="number" step="0.01" placeholder="Valor (R$)" class="bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]" />
           </div>
 
@@ -208,13 +213,17 @@
     </div>
 
     <div v-if="modalExcluirFilme" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div class="bg-[#131516] border border-[#252829] rounded-2xl p-8 w-full max-w-md text-center">
-        <Trash2 class="w-12 h-12 text-[#EF4444] mx-auto mb-4" />
-        <h3 class="text-xl font-bold mb-2">Excluir Filme</h3>
-        <p class="text-[#A8AAAD] mb-6">Deseja excluir <strong class="text-white">{{ filmeParaExcluir?.nome }}</strong>?</p>
-        <div class="flex gap-4">
-          <button @click="executarExclusaoFilme" class="flex-1 bg-[#EF4444] py-3 rounded-lg font-semibold hover:bg-red-600">Excluir</button>
-          <button @click="cancelarExclusaoFilme" class="flex-1 bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg">Cancelar</button>
+      <div class="bg-[#131516] border border-[#252829] rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
+        <div class="w-12 h-12 bg-[#EF4444]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Trash2 class="w-6 h-6 text-[#EF4444]" />
+        </div>
+        <h3 class="text-lg font-bold mb-2">Excluir Filme</h3>
+        <p class="text-[#A8AAAD] text-sm mb-6 leading-relaxed">
+          Tem certeza que deseja excluir <strong class="text-white">{{ filmeParaExcluir?.nome }}</strong>? Esta ação não pode ser desfeita.
+        </p>
+        <div class="flex gap-3">
+          <button @click="executarExclusaoFilme" class="flex-1 bg-[#EF4444] py-2.5 rounded-lg text-sm font-semibold hover:bg-red-600 transition">Excluir</button>
+          <button @click="cancelarExclusaoFilme" class="flex-1 bg-[#1A1C1E] border border-[#252829] py-2.5 rounded-lg text-sm font-semibold hover:bg-[#252829] transition">Cancelar</button>
         </div>
       </div>
     </div>
@@ -235,12 +244,10 @@ import { GENEROS } from '../constants/generos'
 const { filmes, loading, listarFilmes, criarFilme, atualizarFilme, excluirFilme } = useFilme()
 const { usuario } = useUsuario()
 
-// Refs para o Upload de Imagem
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
 const previewImagem = ref<string | null>(null)
 
-// Filtros e Ordenação
 const pesquisa = ref('')
 const filtroGenero = ref('')
 const filtroClassificacao = ref('')
@@ -270,7 +277,6 @@ const filmesFiltrados = computed(() => {
   return res
 })
 
-// Funções de Upload
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
@@ -279,7 +285,6 @@ const handleFileChange = (event: Event) => {
   }
 }
 
-// Modal Criar/Editar
 const modalFilme = ref(false)
 const editandoFilme = ref(false)
 const salvandoFilme = ref(false)
@@ -297,7 +302,7 @@ const abrirModalFilme = (filme?: Filme) => {
     generosSelecionados.value = filme.genero ? filme.genero.split(',').map(g => g.trim()) : []
   } else {
     editandoFilme.value = false
-    formFilme.value = { valorFilme: 0, duracao: 0 }
+    formFilme.value = { valorFilme: '', duracao: '', classificacao: '' }
     generosSelecionados.value = []
   }
   modalFilme.value = true
@@ -319,12 +324,8 @@ const handleSalvarFilme = async () => {
     } else {
       await criarFilme(formFilme.value as Filme, selectedFile.value)
     }
-
     fecharModalFilme()
-    
-    // Busca a lista do zero no banco de dados
     await listarFilmes() 
-
   } catch (e) {
     console.error("Erro ao salvar:", e)
   } finally {
@@ -332,7 +333,6 @@ const handleSalvarFilme = async () => {
   }
 }
 
-// Detalhes, Exclusão e Helpers (Mantidos conforme sua lógica original)
 const filmeDetalhes = ref<Filme | null>(null)
 const sessoesFilme = ref<Sessao[]>([])
 const abrirDetalhes = async (filme: Filme) => {
