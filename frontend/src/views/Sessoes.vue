@@ -1,7 +1,6 @@
 <template>
   <div class="max-w-7xl mx-auto">
 
-    <!-- Header -->
     <div class="flex items-start justify-between mb-2">
       <div>
         <h2 class="text-3xl font-bold" style="font-family: 'Poppins', sans-serif;">
@@ -20,9 +19,7 @@
       </button>
     </div>
 
-    <!-- Filtros -->
     <div class="flex flex-wrap items-end gap-4 mt-6 mb-8">
-      <!-- Filme -->
       <div class="flex flex-col gap-1 flex-1 min-w-[180px]">
         <label class="text-xs text-[#A8AAAD]">Filme</label>
         <select
@@ -34,7 +31,6 @@
         </select>
       </div>
 
-      <!-- Sala -->
       <div class="flex flex-col gap-1 flex-1 min-w-[180px]">
         <label class="text-xs text-[#A8AAAD]">Sala</label>
         <select
@@ -46,7 +42,6 @@
         </select>
       </div>
 
-      <!-- Data -->
       <div class="flex flex-col gap-1 flex-1 min-w-[180px]">
         <label class="text-xs text-[#A8AAAD]">Data</label>
         <input
@@ -56,7 +51,6 @@
         />
       </div>
 
-      <!-- Limpar Filtros -->
       <button
         @click="limparFiltros"
         class="bg-[#1A1C1E] border border-[#252829] px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#252829] transition"
@@ -65,26 +59,22 @@
       </button>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="text-center py-20">
       <div class="inline-block w-8 h-8 border-4 border-[#2FA36A] border-t-transparent rounded-full animate-spin"></div>
       <p class="text-[#A8AAAD] mt-4">Carregando sessões...</p>
     </div>
 
-    <!-- Erro -->
     <div v-if="erro" class="bg-[#EF4444]/20 border border-[#EF4444] text-[#EF4444] px-4 py-3 rounded-lg mb-6 mt-2">
       {{ erro }}
       <button @click="limparErro" class="ml-4 underline">Fechar</button>
     </div>
 
-    <!-- Lista de Cards -->
     <div v-if="!loading && sessoesFiltradas.length > 0" class="flex flex-col gap-4">
       <div
         v-for="sessao in sessoesFiltradas"
         :key="sessao.id"
         class="bg-[#131516] border border-[#252829] rounded-2xl p-6 hover:border-[#2FA36A]/30 transition"
       >
-        <!-- Topo do card -->
         <div class="flex items-start justify-between mb-4">
           <div>
             <h3 class="text-lg font-bold">{{ sessao.filme?.nome ?? 'Filme não definido' }}</h3>
@@ -104,7 +94,6 @@
             </div>
           </div>
 
-          <!-- Ações Admin -->
           <div v-if="usuario?.tipoUsuario === 'ADMINISTRADOR'" class="flex gap-2">
             <button
               @click="abrirModal(sessao)"
@@ -121,7 +110,6 @@
           </div>
         </div>
 
-        <!-- Estatísticas -->
         <div class="grid grid-cols-4 gap-4 border-t border-[#252829] pt-4">
           <div>
             <p class="text-xs text-[#A8AAAD]">Capacidade Total</p>
@@ -145,7 +133,6 @@
       </div>
     </div>
 
-    <!-- Vazio -->
     <div v-if="!loading && sessoes.length === 0 && !erro" class="text-center py-20">
       <Clapperboard class="w-16 h-16 text-[#252829] mx-auto mb-4" />
       <p class="text-[#A8AAAD]">Nenhuma sessão cadastrada.</p>
@@ -156,119 +143,50 @@
       <p class="text-[#A8AAAD]">Nenhuma sessão encontrada para os filtros selecionados.</p>
     </div>
 
-    <!-- ==================== MODAL CRIAR/EDITAR ==================== -->
-    <div
-      v-if="modalAberto"
-      class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      @click.self="fecharModal"
-    >
+    <div v-if="modalAberto" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="fecharModal">
       <div class="bg-[#131516] border border-[#252829] rounded-2xl p-8 w-full max-w-md">
-        <h3 class="text-xl font-bold mb-6" style="font-family: 'Poppins', sans-serif;">
-          {{ editando ? 'Editar Sessão' : 'Nova Sessão' }}
-        </h3>
-
-        <div v-if="erroModal" class="bg-[#EF4444]/20 border border-[#EF4444] text-[#EF4444] px-4 py-3 rounded-lg mb-4 text-sm">
-          {{ erroModal }}
-        </div>
-
+        <h3 class="text-xl font-bold mb-6">{{ editando ? 'Editar Sessão' : 'Nova Sessão' }}</h3>
         <form @submit.prevent="salvarSessao" class="flex flex-col gap-4">
-          <!-- Filme -->
           <div>
             <label class="text-xs text-[#A8AAAD] mb-1 block">Filme</label>
-            <select
-              v-model="formFilmeId"
-              required
-              class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
-            >
+            <select v-model="formFilmeId" required class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3">
               <option value="" disabled>Selecione um filme</option>
               <option v-for="f in filmesDisponiveis" :key="f.id" :value="f.id">{{ f.nome }}</option>
             </select>
           </div>
-
-          <!-- Sala -->
           <div>
             <label class="text-xs text-[#A8AAAD] mb-1 block">Sala</label>
-            <select
-              v-model="formSalaId"
-              required
-              class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
-            >
+            <select v-model="formSalaId" required class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3">
               <option value="" disabled>Selecione uma sala</option>
               <option v-for="s in salasDisponiveis" :key="s.id" :value="s.id">{{ s.nome }}</option>
             </select>
           </div>
-
-          <!-- Data -->
           <div>
             <label class="text-xs text-[#A8AAAD] mb-1 block">Data</label>
-            <input
-              v-model="formData"
-              type="date"
-              required
-              class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
-            />
+            <input v-model="formData" type="date" required class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3" />
           </div>
-
-          <!-- Horário -->
           <div>
             <label class="text-xs text-[#A8AAAD] mb-1 block">Horário</label>
-            <input
-              v-model="formHorario"
-              type="time"
-              required
-              class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3 focus:outline-none focus:border-[#2FA36A]"
-            />
+            <input v-model="formHorario" type="time" required class="w-full bg-[#0D0F10] border border-[#252829] rounded-lg px-4 py-3" />
           </div>
-
           <div class="flex gap-4 mt-4">
-            <button
-              type="submit"
-              :disabled="salvando"
-              class="flex-1 bg-[#2FA36A] py-3 rounded-lg font-semibold hover:bg-[#3BB77C] transition disabled:opacity-50"
-            >
-              {{ salvando ? 'Salvando...' : 'Salvar' }}
-            </button>
-            <button
-              type="button"
-              @click="fecharModal"
-              class="flex-1 bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg hover:bg-[#252829] transition"
-            >
-              Cancelar
-            </button>
+            <button type="submit" :disabled="salvando" class="flex-1 bg-[#2FA36A] py-3 rounded-lg font-semibold">{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
+            <button type="button" @click="fecharModal" class="flex-1 bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg">Cancelar</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- ==================== MODAL EXCLUSÃO ==================== -->
-    <div
-      v-if="modalExclusao"
-      class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      @click.self="cancelarExclusao"
-    >
+    <div v-if="modalExclusao" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="cancelarExclusao">
       <div class="bg-[#131516] border border-[#252829] rounded-2xl p-8 w-full max-w-md text-center">
         <Trash2 class="w-12 h-12 text-[#EF4444] mx-auto mb-4" />
-        <h3 class="text-xl font-bold mb-2" style="font-family: 'Poppins', sans-serif;">Excluir Sessão</h3>
+        <h3 class="text-xl font-bold mb-2">Excluir Sessão</h3>
         <p class="text-[#A8AAAD] mb-6">
-          Tem certeza que deseja excluir a sessão de
-          <strong class="text-white">{{ sessaoParaExcluir?.filme?.nome }}</strong>
-          no dia <strong class="text-white">{{ formatarData(sessaoParaExcluir?.data) }}</strong>
-          às <strong class="text-white">{{ sessaoParaExcluir?.horarioFilme }}</strong>?
+          Deseja excluir a sessão de <strong>{{ sessaoParaExcluir?.filme?.nome }}</strong> no dia <strong>{{ formatarData(sessaoParaExcluir?.data) }}</strong>?
         </p>
         <div class="flex gap-4">
-          <button
-            @click="executarExclusao"
-            :disabled="salvando"
-            class="flex-1 bg-[#EF4444] py-3 rounded-lg font-semibold hover:bg-red-600 transition disabled:opacity-50"
-          >
-            {{ salvando ? 'Excluindo...' : 'Excluir' }}
-          </button>
-          <button
-            @click="cancelarExclusao"
-            class="flex-1 bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg hover:bg-[#252829] transition"
-          >
-            Cancelar
-          </button>
+          <button @click="executarExclusao" :disabled="salvando" class="flex-1 bg-[#EF4444] py-3 rounded-lg font-semibold">Excluir</button>
+          <button @click="cancelarExclusao" class="flex-1 bg-[#1A1C1E] border border-[#252829] py-3 rounded-lg">Cancelar</button>
         </div>
       </div>
     </div>
@@ -283,10 +201,7 @@ import { useSessao } from '../composables/useSessao'
 import { useFilme } from '../composables/useFilme'
 import { useSala } from '../composables/useSala'
 import { useUsuario } from '../composables/useUsuario'
-import sessaoService from '../services/sessaoService'
 import type { Sessao } from '../types/Sessao'
-import type { Filme } from '../types/Filme'
-import type { Sala } from '../types/Sala'
 import { apiDateToBr, apiDateToInput, inputDateToApi } from '../utils/date-utils'
 
 const { sessoes, loading, erro, listarSessoes, criarSessao, atualizarSessao, excluirSessao, limparErro } = useSessao()
@@ -294,13 +209,11 @@ const { filmes, listarFilmes } = useFilme()
 const { salas, listarSalas } = useSala()
 const { usuario } = useUsuario()
 
-// Filtros
 const filtroFilme = ref('')
 const filtroSala = ref('')
 const filtroData = ref('')
-
-// Modal criar/editar
 const modalAberto = ref(false)
+const modalExclusao = ref(false)
 const editando = ref(false)
 const salvando = ref(false)
 const erroModal = ref<string | null>(null)
@@ -309,12 +222,8 @@ const formSalaId = ref('')
 const formData = ref('')
 const formHorario = ref('')
 const sessaoEditando = ref<Sessao | null>(null)
-
-// Modal exclusão
-const modalExclusao = ref(false)
 const sessaoParaExcluir = ref<Sessao | null>(null)
 
-// Computed
 const filmesDisponiveis = computed(() => filmes.value.filter(f => f.id))
 const salasDisponiveis = computed(() => salas.value.filter(s => s.id))
 
@@ -323,43 +232,29 @@ const sessoesFiltradas = computed(() => {
     if (filtroFilme.value && s.filme?.id !== filtroFilme.value) return false
     if (filtroSala.value && s.sala?.id !== filtroSala.value) return false
     if (filtroData.value) {
-      const dataSessao = formatarDataISO(s.data)
-      if (dataSessao !== filtroData.value) return false
+      if (apiDateToInput(s.data) !== filtroData.value) return false
     }
     return true
   })
 })
 
-// Lifecycle
 onMounted(async () => {
   await Promise.all([listarSessoes(), listarFilmes(), listarSalas()])
 })
 
-// Helpers
+// HELPERS (Uso estrito de String)
 const formatarData = (data?: string | number) => apiDateToBr(data)
 const formatarDataISO = (data?: string | number) => apiDateToInput(data)
 
 const getVendidos = (sessao: Sessao) => sessao.ingressos?.length ?? 0
-
-const getDisponivel = (sessao: Sessao) => {
-  const total = sessao.sala?.numAssentos ?? 0
-  const vendidos = getVendidos(sessao)
-  return Math.max(0, total - vendidos)
-}
-
+const getDisponivel = (sessao: Sessao) => Math.max(0, (sessao.sala?.numAssentos ?? 0) - getVendidos(sessao))
 const getOcupacao = (sessao: Sessao) => {
   const total = sessao.sala?.numAssentos ?? 0
-  if (total === 0) return 0
-  return Math.round((getVendidos(sessao) / total) * 100)
+  return total > 0 ? Math.round((getVendidos(sessao) / total) * 100) : 0
 }
 
-const limparFiltros = () => {
-  filtroFilme.value = ''
-  filtroSala.value = ''
-  filtroData.value = ''
-}
+const limparFiltros = () => { filtroFilme.value = ''; filtroSala.value = ''; filtroData.value = '' }
 
-// Modal criar/editar
 const abrirModal = async (sessao?: Sessao) => {
   erroModal.value = null
   if (sessao && sessao.id) {
@@ -367,80 +262,48 @@ const abrirModal = async (sessao?: Sessao) => {
     sessaoEditando.value = sessao
     formFilmeId.value = sessao.filme?.id ?? ''
     formSalaId.value = sessao.sala?.id ?? ''
-    formData.value = formatarDataISO(sessao.data)
+    formData.value = apiDateToInput(sessao.data) // Pega "2026-03-13" direto
     formHorario.value = sessao.horarioFilme ?? ''
   } else {
     editando.value = false
     sessaoEditando.value = null
-    formFilmeId.value = ''
-    formSalaId.value = ''
-    formData.value = ''
-    formHorario.value = ''
+    formFilmeId.value = ''; formSalaId.value = ''; formData.value = ''; formHorario.value = ''
   }
   modalAberto.value = true
 }
 
-const fecharModal = () => {
-  modalAberto.value = false
-  editando.value = false
-  sessaoEditando.value = null
-  erroModal.value = null
-  formFilmeId.value = ''
-  formSalaId.value = ''
-  formData.value = ''
-  formHorario.value = ''
-}
+const fecharModal = () => { modalAberto.value = false; erroModal.value = null }
 
 const salvarSessao = async () => {
   if (!formFilmeId.value || !formSalaId.value || !formData.value || !formHorario.value) return
-
   salvando.value = true
-  erroModal.value = null
   try {
     const payload: Sessao = {
-      data: inputDateToApi(formData.value),
+      data: formData.value, // Envia "2026-03-13"
       horarioFilme: formHorario.value,
       filme: { id: formFilmeId.value },
       sala: { id: formSalaId.value },
       ingressos: []
     }
-
     if (editando.value && sessaoEditando.value?.id) {
       await atualizarSessao(sessaoEditando.value.id, payload)
     } else {
       await criarSessao(payload)
     }
-    fecharModal()
-    await listarSessoes()
+    fecharModal(); await listarSessoes()
   } catch (e: any) {
-    erroModal.value = e.response?.data || e.response?.data?.message || 'Erro ao salvar sessão'
-  } finally {
-    salvando.value = false
-  }
+    erroModal.value = 'Erro ao salvar sessão'
+  } finally { salvando.value = false }
 }
 
-// Modal exclusão
-const confirmarExclusao = (sessao: Sessao) => {
-  sessaoParaExcluir.value = sessao
-  modalExclusao.value = true
-}
-
-const cancelarExclusao = () => {
-  sessaoParaExcluir.value = null
-  modalExclusao.value = false
-}
-
+const confirmarExclusao = (sessao: Sessao) => { sessaoParaExcluir.value = sessao; modalExclusao.value = true }
+const cancelarExclusao = () => { sessaoParaExcluir.value = null; modalExclusao.value = false }
 const executarExclusao = async () => {
   if (!sessaoParaExcluir.value?.id) return
-
   salvando.value = true
   try {
     await excluirSessao(sessaoParaExcluir.value.id)
     cancelarExclusao()
-  } catch (e) {
-    // erro tratado no composable
-  } finally {
-    salvando.value = false
-  }
+  } finally { salvando.value = false }
 }
 </script>

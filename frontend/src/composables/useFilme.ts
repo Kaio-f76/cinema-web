@@ -21,11 +21,13 @@ export function useFilme() {
         }
     }
 
-    const criarFilme = async (filme: Filme) => {
+    // Adicionado parâmetro arquivoImagem (opcional)
+    const criarFilme = async (filme: Filme, arquivoImagem?: File) => {
         loading.value = true
         erro.value = null
         try {
-            const novoFilme = await filmeService.criar(filme)
+            // Repassa o filme e o arquivo para o service
+            const novoFilme = await filmeService.criar(filme, arquivoImagem)
             filmes.value.push(novoFilme)
             return novoFilme
         } catch (e: any) {
@@ -36,16 +38,19 @@ export function useFilme() {
         }
     }
 
-    const atualizarFilme = async (id: string, filme: Partial<Filme>) => {
+    const atualizarFilme = async (id: string, filme: Partial<Filme>, arquivoImagem?: File) => {
         loading.value = true
-        erro.value = null
         try {
-            const atualizado = await filmeService.atualizar(id, filme)
+            const atualizado = await filmeService.atualizar(id, filme, arquivoImagem)
+
+            // Encontra o filme na lista e substitui pelo objeto "fresco" vindo do backend
             const index = filmes.value.findIndex(f => f.id === id)
-            if (index !== -1) filmes.value[index] = atualizado
-            return atualizado
+            if (index !== -1) {
+                filmes.value[index] = { ...atualizado }
+            }
+            return atualizado // IMPORTANTE: retornar o objeto aqui
         } catch (e: any) {
-            erro.value = e.response?.data?.message || 'Erro ao atualizar filme'
+            erro.value = e.response?.data?.message || 'Erro ao atualizar'
             throw e
         } finally {
             loading.value = false

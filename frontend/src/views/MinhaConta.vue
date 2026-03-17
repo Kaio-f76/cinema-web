@@ -156,7 +156,7 @@
             <div class="w-14 h-20 rounded-lg overflow-hidden flex-shrink-0">
               <img
                 v-if="ing.imagemUrl"
-                :src="`/filmes/${ing.imagemUrl}`"
+                :src="getImagemUrl(ing.imagemUrl)"
                 :alt="ing.nomeFilme"
                 class="w-full h-full object-cover"
               />
@@ -201,7 +201,7 @@
                 <div class="w-28 h-40 rounded-xl overflow-hidden flex-shrink-0">
                   <img
                     v-if="ing.imagemUrl"
-                    :src="`/filmes/${ing.imagemUrl}`"
+                    :src="getImagemUrl(ing.imagemUrl)"
                     :alt="ing.nomeFilme"
                     class="w-full h-full object-cover"
                   />
@@ -369,6 +369,13 @@ import { apiDateToBr } from '../utils/date-utils'
 
 const router = useRouter()
 const { usuario, setUsuario, clearUsuario, fetchUsuario } = useUsuario()
+
+const UPLOADS_URL = 'http://localhost:8080/uploads/'
+
+const getImagemUrl = (url?: string): string => {
+  if (!url) return ''
+  return url.startsWith('http') ? url : `${UPLOADS_URL}${url}`
+}
 
 const form = ref({
   nome: '',
