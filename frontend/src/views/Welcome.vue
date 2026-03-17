@@ -6,7 +6,7 @@
         <div class="inline-block w-10 h-10 border-4 border-[#2FA36A] border-t-transparent rounded-full animate-spin"></div>
       </div>
 
-      <template v-else-if="filmes.length > 0">
+      <template v-else-if="filmesExibidos.length > 0">
         <transition :name="transicao" mode="out-in">
           <div
             :key="filmeAtualIndex"
@@ -97,7 +97,7 @@
 
         <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
           <div
-            v-for="(f, index) in filmes"
+            v-for="(f, index) in filmesExibidos"
             :key="index"
             class="w-8 h-1 rounded-full border border-white/30 transition-colors duration-500 cursor-pointer"
             :class="filmeAtualIndex === index ? 'bg-[#2FA36A]' : 'bg-black/50'"
@@ -111,7 +111,7 @@
       </div>
     </div>
 
-    <section v-if="!carregandoInicial && filmes.length > 0" class="max-w-7xl mx-auto px-6 py-10">
+    <section v-if="!carregandoInicial && filmesExibidos.length > 0" class="max-w-7xl mx-auto px-6 py-10">
       <div class="mb-6">
         <h2 class="text-2xl font-bold mb-0.5" style="font-family: 'Poppins', sans-serif;">
           Confira os filmes em cartaz
@@ -121,7 +121,7 @@
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4">
         <router-link
-          v-for="filme in filmes"
+          v-for="filme in filmesExibidos"
           :key="filme.id"
           :to="usuario ? `/filmes` : '/login'"
           class="group cursor-pointer block film-card"
@@ -170,8 +170,12 @@ const filmeAtualIndex = ref(0)
 const transicao = ref('slide-left')
 const carregandoInicial = ref(true)
 
+const filmesExibidos = computed(() => {
+  return filmes.value.slice(0, 5)
+})
+
 const filmeAtual = computed(() => {
-  const f = filmes.value[filmeAtualIndex.value]
+  const f = filmesExibidos.value[filmeAtualIndex.value]
   if (!f) return { nome: '', poster: '', generos: [], duracao: 0, classificacao: '', descricao: '' }
   return {
     ...f,
@@ -181,15 +185,15 @@ const filmeAtual = computed(() => {
 })
 
 const proximoFilme = () => {
-  if (filmes.value.length === 0) return
+  if (filmesExibidos.value.length === 0) return
   transicao.value = 'slide-left'
-  filmeAtualIndex.value = (filmeAtualIndex.value + 1) % filmes.value.length
+  filmeAtualIndex.value = (filmeAtualIndex.value + 1) % filmesExibidos.value.length
 }
 
 const anteriorFilme = () => {
-  if (filmes.value.length === 0) return
+  if (filmesExibidos.value.length === 0) return
   transicao.value = 'slide-right'
-  filmeAtualIndex.value = (filmeAtualIndex.value - 1 + filmes.value.length) % filmes.value.length
+  filmeAtualIndex.value = (filmeAtualIndex.value - 1 + filmesExibidos.value.length) % filmesExibidos.value.length
 }
 
 onMounted(async () => {
