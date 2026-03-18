@@ -111,7 +111,7 @@
       </div>
     </div>
 
-    <section v-if="!carregandoInicial && filmesExibidos.length > 0" class="max-w-7xl mx-auto px-6 py-10">
+    <section v-if="!carregandoInicial && filmes.length > 0" class="max-w-7xl mx-auto px-6 py-10">
       <div class="mb-6">
         <h2 class="text-2xl font-bold mb-0.5" style="font-family: 'Poppins', sans-serif;">
           Confira os filmes em cartaz
@@ -121,7 +121,7 @@
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4">
         <router-link
-          v-for="filme in filmesExibidos"
+          v-for="filme in filmes"
           :key="filme.id"
           :to="usuario ? `/filmes` : '/login'"
           class="group cursor-pointer block film-card"
